@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useToastStore } from '@/store/useToastStore';
 import { 
   LayoutDashboard, 
   Users, 
@@ -46,6 +47,9 @@ export default function Sidebar() {
             <Link
               key={item.path}
               to={item.path}
+              onClick={() => {
+                useToastStore.getState().addToast(`Opening ${item.name}...`, 'info');
+              }}
               className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                 isActive 
                   ? 'bg-cyan-600 text-white' 
