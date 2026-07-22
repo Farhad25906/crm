@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTabStore } from '@/store/useTabStore';
 import { useToastStore } from '@/store/useToastStore';
 import { CUSTOMER_DATASET, searchCustomerRecords, CustomerRecord } from '@/data/customerDataset';
-import { Search, RotateCcw, ChevronRight, User, Phone, CreditCard, ChevronDown } from 'lucide-react';
+import { Search, RotateCcw, ChevronRight, User, AlertCircle } from 'lucide-react';
 
 export default function CRMCustomerSearch() {
   const navigate = useNavigate();
@@ -14,7 +14,8 @@ export default function CRMCustomerSearch() {
   const [fullName, setFullName] = useState('');
   const [idNumber, setIdNumber] = useState('');
   const [showDetails, setShowDetails] = useState(false);
-  const [searchResults, setSearchResults] = useState<CustomerRecord[]>(CUSTOMER_DATASET);
+  const [searchResults, setSearchResults] = useState<CustomerRecord[]>([]);
+  const [hasSearched, setHasSearched] = useState(false);
 
   useEffect(() => {
     addTab({
@@ -27,18 +28,29 @@ export default function CRMCustomerSearch() {
 
   const handleSearch = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+
+    if (!serviceNo.trim() && !fullName.trim() && !idNumber.trim()) {
+      addToast('Please enter Service No. to search subscriber data', 'warning');
+      return;
+    }
+
     const results = searchCustomerRecords(serviceNo, fullName, idNumber);
+    setHasSearched(true);
     setSearchResults(results);
 
-    if (results.length === 1) {
-      const cust = results[0];
-      addToast(`Found customer: ${cust.fullName}`, 'success');
-      openCustomerTab(cust);
-    } else if (results.length > 1) {
-      addToast(`Found ${results.length} matching customers`, 'info');
+    if (results.length > 0) {
+      // Auto-fill Full Name and ID/NID fields based on search result
+      const topMatch = results[0];
+      setFullName(topMatch.fullName);
+      setIdNumber(topMatch.idNumber);
+
+      if (results.length === 1) {
+        addToast(`Found customer: ${topMatch.fullName} (${topMatch.serviceNo})`, 'success');
+      } else {
+        addToast(`Found ${results.length} matching customers`, 'info');
+      }
     } else {
-      addToast('No matching customer found. Showing all records.', 'warning');
-      setSearchResults(CUSTOMER_DATASET);
+      addToast(`No customer found matching Service No: ${serviceNo}`, 'warning');
     }
   };
 
@@ -46,7 +58,8 @@ export default function CRMCustomerSearch() {
     setServiceNo('');
     setFullName('');
     setIdNumber('');
-    setSearchResults(CUSTOMER_DATASET);
+    setSearchResults([]);
+    setHasSearched(false);
     addToast('Search conditions reset', 'info');
   };
 
@@ -56,7 +69,7 @@ export default function CRMCustomerSearch() {
 
     addTab({
       id: tabId,
-      name: customer.fullName, // Tab name is Customer's Full Name!
+      name: customer.fullName,
       path,
       isClosable: true
     });
@@ -93,7 +106,7 @@ export default function CRMCustomerSearch() {
                 value={serviceNo}
                 onChange={(e) => setServiceNo(e.target.value)}
                 placeholder="e.g. 1575851306"
-                className="px-3 py-1.5 text-xs bg-[#ffffd0]/30 border border-gray-300 rounded-sm outline-none focus:border-blue-500 focus:bg-white font-mono"
+                className="px-3 py-1.5 text-xs bg-[#ffffd0]/40 border border-gray-300 rounded-sm outline-none focus:border-blue-500 focus:bg-white font-mono font-semibold"
               />
             </div>
 
@@ -106,22 +119,22 @@ export default function CRMCustomerSearch() {
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="e.g. NESHAD AHMED SUPTO"
-                className="px-3 py-1.5 text-xs bg-white border border-gray-300 rounded-sm outline-none focus:border-blue-500"
+                placeholder="Auto-filled on search"
+                className="px-3 py-1.5 text-xs bg-gray-50 border border-gray-300 rounded-sm outline-none focus:border-blue-500 font-semibold text-gray-800"
               />
             </div>
 
             {/* ID Number */}
             <div className="flex flex-col gap-1">
               <label className="text-[11px] text-gray-700 font-semibold">
-                ID Number
+                ID / NID Number
               </label>
               <input
                 type="text"
                 value={idNumber}
                 onChange={(e) => setIdNumber(e.target.value)}
-                placeholder="e.g. 1995827391024"
-                className="px-3 py-1.5 text-xs bg-white border border-gray-300 rounded-sm outline-none focus:border-blue-500 font-mono"
+                placeholder="Auto-filled on search"
+                className="px-3 py-1.5 text-xs bg-gray-50 border border-gray-300 rounded-sm outline-none focus:border-blue-500 font-mono text-gray-800"
               />
             </div>
 
@@ -145,6 +158,31 @@ export default function CRMCustomerSearch() {
               </button>
             </div>
 
+          </div>
+
+          {/* Quick Service No. Samples */}
+          <div className="mt-3 flex items-center gap-2 text-[11px] text-gray-600 flex-wrap">
+            <span className="font-semibold text-gray-500">Sample Service Nos:</span>
+            {['1575851306', '01552123456', '01552987654', '01511223344', '01544556677'].map((num) => (
+              <button
+                key={num}
+                type="button"
+                onClick={() => {
+                  setServiceNo(num);
+                  const results = searchCustomerRecords(num, '', '');
+                  if (results.length > 0) {
+                    setSearchResults(results);
+                    setHasSearched(true);
+                    setFullName(results[0].fullName);
+                    setIdNumber(results[0].idNumber);
+                    addToast(`Found customer: ${results[0].fullName}`, 'success');
+                  }
+                }}
+                className="px-2 py-0.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded font-mono cursor-pointer text-[10px]"
+              >
+                {num}
+              </button>
+            ))}
           </div>
 
           {/* Expandable Details toggle button */}
@@ -175,14 +213,16 @@ export default function CRMCustomerSearch() {
           )}
         </form>
 
-        {/* Results List / 10 Dummy Dataset Quick Pick Grid */}
+        {/* Results List Table */}
         <div className="p-4 bg-white">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
               <User className="w-4 h-4 text-blue-600" />
               Customer Search Results ({searchResults.length} Records)
             </h3>
-            <span className="text-[11px] text-gray-500">Click any customer row to open their profile tab</span>
+            {searchResults.length > 0 && (
+              <span className="text-[11px] text-gray-500">Click any customer row to open their profile tab</span>
+            )}
           </div>
 
           <div className="overflow-x-auto border border-gray-200 rounded-sm">
@@ -200,55 +240,73 @@ export default function CRMCustomerSearch() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {searchResults.map((cust) => (
-                  <tr
-                    key={cust.id}
-                    onClick={() => openCustomerTab(cust)}
-                    className="hover:bg-blue-50/70 transition-colors cursor-pointer group"
-                  >
-                    <td className="px-3 py-2.5 font-mono font-bold text-blue-700 group-hover:underline">
-                      {cust.serviceNo}
-                    </td>
-                    <td className="px-3 py-2.5 font-bold text-gray-900">
-                      {cust.fullName}
-                    </td>
-                    <td className="px-3 py-2.5 font-mono text-gray-600">{cust.idNumber}</td>
-                    <td className="px-3 py-2.5 font-mono text-gray-700">{cust.accountNo}</td>
-                    <td className="px-3 py-2.5">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                        cust.paymentFlag === 'Prepaid' ? 'bg-[#e8f5e9] text-[#2e7d32]' : 'bg-[#e3f2fd] text-[#1565c0]'
-                      }`}>
-                        {cust.paymentFlag}
-                      </span>
-                    </td>
-                    <td className="px-3 py-2.5 font-medium text-gray-800">{cust.primaryOffering}</td>
-                    <td className="px-3 py-2.5">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                        cust.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
-                      }`}>
-                        {cust.status}
-                      </span>
-                    </td>
-                    <td className="px-3 py-2.5 text-right">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openCustomerTab(cust);
-                        }}
-                        className="px-3 py-1 text-[11px] font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-sm shadow-2xs transition-colors cursor-pointer flex items-center gap-1 ml-auto"
-                      >
-                        Open Tab
-                        <ChevronRight className="w-3 h-3" />
-                      </button>
+                {searchResults.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="px-4 py-8 text-center bg-gray-50/50">
+                      <div className="flex flex-col items-center justify-center text-gray-400 gap-1.5">
+                        <AlertCircle className="w-6 h-6 text-gray-300" />
+                        <p className="text-xs font-medium text-gray-600">
+                          {hasSearched 
+                            ? 'No subscriber records match your search criteria.' 
+                            : 'Please enter a Service No. above and click Search to display customer records.'}
+                        </p>
+                        <p className="text-[11px] text-gray-400">
+                          {hasSearched ? 'Try searching with a different Service No.' : 'Data is loaded on-demand per search query.'}
+                        </p>
+                      </div>
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  searchResults.map((cust) => (
+                    <tr
+                      key={cust.id}
+                      onClick={() => openCustomerTab(cust)}
+                      className="hover:bg-blue-50/70 transition-colors cursor-pointer group"
+                    >
+                      <td className="px-3 py-2.5 font-mono font-bold text-blue-700 group-hover:underline">
+                        {cust.serviceNo}
+                      </td>
+                      <td className="px-3 py-2.5 font-bold text-gray-900">
+                        {cust.fullName}
+                      </td>
+                      <td className="px-3 py-2.5 font-mono text-gray-600">{cust.idNumber}</td>
+                      <td className="px-3 py-2.5 font-mono text-gray-700">{cust.accountNo}</td>
+                      <td className="px-3 py-2.5">
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                          cust.paymentFlag === 'Prepaid' ? 'bg-[#e8f5e9] text-[#2e7d32]' : 'bg-[#e3f2fd] text-[#1565c0]'
+                        }`}>
+                          {cust.paymentFlag}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2.5 font-medium text-gray-800">{cust.primaryOffering}</td>
+                      <td className="px-3 py-2.5">
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                          cust.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                        }`}>
+                          {cust.status}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2.5 text-right">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openCustomerTab(cust);
+                          }}
+                          className="px-3 py-1 text-[11px] font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-sm shadow-2xs transition-colors cursor-pointer flex items-center gap-1 ml-auto"
+                        >
+                          Open Tab
+                          <ChevronRight className="w-3 h-3" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
 
           <div className="mt-3 text-[11px] text-gray-500 flex items-center justify-between">
-            <span>Total Records: {searchResults.length}</span>
+            <span>Total Records Displayed: {searchResults.length}</span>
             <span>Teletalk Bangladesh Limited • Customer Care System</span>
           </div>
 

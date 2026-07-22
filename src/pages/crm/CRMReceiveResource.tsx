@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useTabStore } from '@/store/useTabStore';
 import { useToastStore } from '@/store/useToastStore';
 import { Calendar, FolderOpen, Trash2, MessageSquare } from 'lucide-react';
@@ -6,6 +6,7 @@ import { Calendar, FolderOpen, Trash2, MessageSquare } from 'lucide-react';
 export default function CRMReceiveResource() {
   const addTab = useTabStore((state) => state.addTab);
   const addToast = useToastStore((state) => state.addToast);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Form States
   const [resourceType, setResourceType] = useState('MSISDN');
@@ -28,6 +29,15 @@ export default function CRMReceiveResource() {
       isClosable: true
     });
   }, [addTab]);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const selectedFile = e.target.files[0];
+      const newPath = `C:\\fakepath\\${selectedFile.name}`;
+      setFilePath(newPath);
+      addToast(`File uploaded: ${selectedFile.name}`, 'success');
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -263,14 +273,22 @@ export default function CRMReceiveResource() {
               </label>
               <div className="col-span-9 flex items-center gap-1.5 w-full max-w-xl">
                 <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                <input
                   type="text"
                   value={filePath}
                   onChange={(e) => setFilePath(e.target.value)}
-                  className="flex-1 border border-gray-300 rounded-sm bg-[#fffdf0] px-2 py-0.5 text-xs h-6 outline-none focus:border-cyan-500"
+                  placeholder="No file chosen"
+                  className="flex-1 border border-gray-300 rounded-sm bg-[#fffdf0] px-2 py-0.5 text-xs h-6 outline-none focus:border-cyan-500 font-mono"
                 />
                 <button
                   type="button"
-                  onClick={() => addToast('Opening file browser dialog...', 'info')}
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Upload File"
                   className="w-6 h-6 border border-gray-300 rounded-sm bg-gray-50 flex items-center justify-center hover:bg-gray-100 cursor-pointer shrink-0"
                 >
                   <FolderOpen className="w-3.5 h-3.5 text-cyan-600" />
@@ -279,8 +297,10 @@ export default function CRMReceiveResource() {
                   type="button"
                   onClick={() => {
                     setFilePath('');
+                    if (fileInputRef.current) fileInputRef.current.value = '';
                     addToast('File path cleared', 'info');
                   }}
+                  title="Clear File"
                   className="w-6 h-6 border border-gray-300 rounded-sm bg-gray-50 flex items-center justify-center hover:bg-gray-100 cursor-pointer shrink-0"
                 >
                   <Trash2 className="w-3.5 h-3.5 text-red-500" />
@@ -288,6 +308,7 @@ export default function CRMReceiveResource() {
                 <button
                   type="button"
                   onClick={() => addToast('Displaying resource file instructions...', 'info')}
+                  title="Instructions"
                   className="w-6 h-6 border border-gray-300 rounded-sm bg-gray-50 flex items-center justify-center hover:bg-gray-100 cursor-pointer shrink-0"
                 >
                   <MessageSquare className="w-3.5 h-3.5 text-amber-500" />

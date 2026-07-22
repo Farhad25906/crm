@@ -10,6 +10,138 @@ import {
   Clock 
 } from 'lucide-react';
 
+// Offer Data Model
+export interface OfferingItem {
+  id: string;
+  name: string;
+  shortName: string;
+  offeringCode: string;
+  primaryOffering: string;
+  teleType: string;
+  ownerType: string;
+  offeringPackage: string;
+  sellSingly: string;
+  offeringType: string;
+  paymentFlag: string;
+  status: string;
+  category: string;
+  subCategory: string;
+  initialBalance: string;
+  monthlyFee: string;
+  groupFlag: string;
+  offerValueRule: string;
+  description: string;
+}
+
+// 5 Offerings Dataset
+export const OFFERING_DATASET: OfferingItem[] = [
+  {
+    id: 'S49023',
+    name: 'Eid_Special_Offer',
+    shortName: 'Offer59',
+    offeringCode: 'S49023',
+    primaryOffering: 'No',
+    teleType: '4G',
+    ownerType: 'Subscriber',
+    offeringPackage: 'Simple Offering',
+    sellSingly: 'Sell Singly',
+    offeringType: 'Individual',
+    paymentFlag: 'All',
+    status: 'Release',
+    category: 'Other',
+    subCategory: 'Festival Bonus',
+    initialBalance: '৳0.00',
+    monthlyFee: '৳0.00',
+    groupFlag: 'Not Group',
+    offerValueRule: 'RULE_EID_2026',
+    description: 'Special Eid promotional data & talktime package for subscribers.'
+  },
+  {
+    id: 'S49024',
+    name: 'Unlimited_Data_Pack_30D',
+    shortName: 'Data30D',
+    offeringCode: 'S49024',
+    primaryOffering: 'Yes',
+    teleType: '4G/5G',
+    ownerType: 'Subscriber',
+    offeringPackage: 'Data Plus Offering',
+    sellSingly: 'Sell Singly',
+    offeringType: 'Individual',
+    paymentFlag: 'Prepaid',
+    status: 'Release',
+    category: 'Data Pack',
+    subCategory: 'Monthly Unlimited',
+    initialBalance: '৳0.00',
+    monthlyFee: '৳499.00',
+    groupFlag: 'Not Group',
+    offerValueRule: 'RULE_DATA_UNLIMITED',
+    description: 'High-speed 4G/5G data pack with 30 days validity.'
+  },
+  {
+    id: 'S49025',
+    name: 'Postpaid_Corporate_Bundle',
+    shortName: 'CorpBundle',
+    offeringCode: 'S49025',
+    primaryOffering: 'Yes',
+    teleType: '4G',
+    ownerType: 'Enterprise',
+    offeringPackage: 'Corporate Suite',
+    sellSingly: 'Sell Singly',
+    offeringType: 'Group/Corporate',
+    paymentFlag: 'Postpaid',
+    status: 'Release',
+    category: 'Corporate',
+    subCategory: 'Executive Plan',
+    initialBalance: '৳500.00',
+    monthlyFee: '৳1200.00',
+    groupFlag: 'Group',
+    offerValueRule: 'RULE_CORP_DEFAULT',
+    description: 'Enterprise corporate postpaid bundle with pool sharing.'
+  },
+  {
+    id: 'S49026',
+    name: 'Student_Special_Voice_Pack',
+    shortName: 'StudentVoice',
+    offeringCode: 'S49026',
+    primaryOffering: 'No',
+    teleType: '3G/4G',
+    ownerType: 'Subscriber',
+    offeringPackage: 'Campus Pack',
+    sellSingly: 'Sell Singly',
+    offeringType: 'Individual',
+    paymentFlag: 'Prepaid',
+    status: 'Release',
+    category: 'Voice Pack',
+    subCategory: 'Student Offer',
+    initialBalance: '৳10.00',
+    monthlyFee: '৳49.00',
+    groupFlag: 'Not Group',
+    offerValueRule: 'RULE_STUDENT_DISCOUNT',
+    description: 'Affordable voice call minute pack for student SIM holders.'
+  },
+  {
+    id: 'S49027',
+    name: 'Roam_Global_Pass_7D',
+    shortName: 'RoamPass',
+    offeringCode: 'S49027',
+    primaryOffering: 'No',
+    teleType: '5G',
+    ownerType: 'Subscriber',
+    offeringPackage: 'Roaming Package',
+    sellSingly: 'Sell Singly',
+    offeringType: 'Individual',
+    paymentFlag: 'All',
+    status: 'Release',
+    category: 'Roaming',
+    subCategory: 'International Pass',
+    initialBalance: '৳0.00',
+    monthlyFee: '৳1500.00',
+    groupFlag: 'Not Group',
+    offerValueRule: 'RULE_ROAM_GLOBAL',
+    description: '7-day international roaming data and voice pass across 45 countries.'
+  }
+];
+
 // Second Layer Header Tabs
 const SECOND_LAYER_TABS = [
   { id: 'summary', label: 'Summary' },
@@ -31,8 +163,8 @@ export default function CRMConfigureOffering() {
   const [activeSubTab, setActiveSubTab] = useState('basic-info');
 
   // Tree & Section accordion state
-  const [selectedOffer, setSelectedOffer] = useState('Eid_Special_Offer');
-  const [treeSearch, setTreeSearch] = useState('Eid_Special_Offer');
+  const [selectedOfferId, setSelectedOfferId] = useState('S49023');
+  const [treeSearch, setTreeSearch] = useState('');
   const [isBasicInfoExpanded, setIsBasicInfoExpanded] = useState(true);
   const [isSubscriptionInfoExpanded, setIsSubscriptionInfoExpanded] = useState(true);
 
@@ -50,6 +182,21 @@ export default function CRMConfigureOffering() {
     if (tabId !== 'basic-info') {
       addToast(`Switched to ${label} tab`, 'info');
     }
+  };
+
+  // Currently selected offer object
+  const currentOffer = OFFERING_DATASET.find(o => o.id === selectedOfferId) || OFFERING_DATASET[0];
+
+  // Filtered tree offers
+  const filteredOffers = OFFERING_DATASET.filter(offer => 
+    offer.name.toLowerCase().includes(treeSearch.toLowerCase()) ||
+    offer.shortName.toLowerCase().includes(treeSearch.toLowerCase()) ||
+    offer.id.toLowerCase().includes(treeSearch.toLowerCase())
+  );
+
+  const handleSelectOffer = (offer: OfferingItem) => {
+    setSelectedOfferId(offer.id);
+    addToast(`Selected offering: ${offer.name}`, 'info');
   };
 
   return (
@@ -87,7 +234,7 @@ export default function CRMConfigureOffering() {
                     type="text"
                     value={treeSearch}
                     onChange={(e) => setTreeSearch(e.target.value)}
-                    placeholder="Offer Catalog"
+                    placeholder="Search Offerings..."
                     className="w-full pl-2 pr-6 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:border-blue-500 bg-white"
                   />
                   <Search className="w-3.5 h-3.5 text-gray-400 absolute right-1.5 top-1.5" />
@@ -107,36 +254,48 @@ export default function CRMConfigureOffering() {
                 <div className="flex items-center gap-1.5 text-gray-700 font-medium cursor-pointer py-0.5">
                   <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
                   <FolderOpen className="w-4 h-4 text-amber-500" />
-                  <span>Offer Catalog</span>
+                  <span>Offer Catalog ({OFFERING_DATASET.length})</span>
                 </div>
 
                 {/* Sub 1: INS Supplementary Offerings */}
-                <div className="pl-4 flex items-center gap-1.5 text-gray-700 font-medium cursor-pointer py-0.5">
+                <div className="pl-3 flex items-center gap-1.5 text-gray-700 font-medium cursor-pointer py-0.5">
                   <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
                   <FolderOpen className="w-4 h-4 text-amber-500" />
                   <span>INS Supplementary Offerings</span>
                 </div>
 
                 {/* Sub 2: Common */}
-                <div className="pl-8 flex items-center gap-1.5 text-gray-700 font-medium cursor-pointer py-0.5">
+                <div className="pl-6 flex items-center gap-1.5 text-gray-700 font-medium cursor-pointer py-0.5">
                   <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
                   <FolderOpen className="w-4 h-4 text-amber-500" />
-                  <span>Common</span>
+                  <span>Common Offerings ({filteredOffers.length})</span>
                 </div>
 
-                {/* Sub 3: Eid_Special_Offer (Selected Item) */}
-                <div className="pl-12">
-                  <div
-                    onClick={() => setSelectedOffer('Eid_Special_Offer')}
-                    className={`flex items-center gap-1.5 px-2 py-1 rounded cursor-pointer transition-colors ${
-                      selectedOffer === 'Eid_Special_Offer'
-                        ? 'bg-blue-100 text-blue-900 font-semibold border border-blue-300'
-                        : 'hover:bg-gray-200 text-gray-700'
-                    }`}
-                  >
-                    <FileText className="w-3.5 h-3.5 text-blue-600" />
-                    <span>Eid_Special_Offer</span>
-                  </div>
+                {/* Sub 3: Dynamic Offerings List */}
+                <div className="pl-9 space-y-1">
+                  {filteredOffers.length === 0 ? (
+                    <div className="text-[11px] text-gray-400 italic py-1 px-2">
+                      No matching offering found
+                    </div>
+                  ) : (
+                    filteredOffers.map((offer) => {
+                      const isSelected = offer.id === selectedOfferId;
+                      return (
+                        <div
+                          key={offer.id}
+                          onClick={() => handleSelectOffer(offer)}
+                          className={`flex items-center gap-1.5 px-2 py-1.5 rounded cursor-pointer transition-colors text-xs ${
+                            isSelected
+                              ? 'bg-blue-100 text-blue-900 font-bold border border-blue-300 shadow-2xs'
+                              : 'hover:bg-gray-200 text-gray-700'
+                          }`}
+                        >
+                          <FileText className={`w-3.5 h-3.5 shrink-0 ${isSelected ? 'text-blue-700' : 'text-gray-500'}`} />
+                          <span className="truncate">{offer.name}</span>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               </div>
             </div>
@@ -153,7 +312,7 @@ export default function CRMConfigureOffering() {
                 >
                   <div className="flex items-center gap-1.5">
                     <span className="text-blue-600">♦</span>
-                    <span>Basic Info</span>
+                    <span>Basic Info - {currentOffer.name}</span>
                   </div>
                   <ChevronDown
                     className={`w-4 h-4 text-gray-600 transition-transform ${
@@ -173,8 +332,8 @@ export default function CRMConfigureOffering() {
                         <input
                           type="text"
                           readOnly
-                          value="Eid_Special_Offer"
-                          className="flex-1 bg-blue-50/50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-900 font-semibold"
+                          value={currentOffer.name}
+                          className="flex-1 bg-blue-50/60 border border-blue-200 rounded px-2 py-1 text-xs text-blue-900 font-bold"
                         />
                       </div>
 
@@ -184,8 +343,8 @@ export default function CRMConfigureOffering() {
                         <input
                           type="text"
                           readOnly
-                          value="S49023"
-                          className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800"
+                          value={currentOffer.id}
+                          className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800 font-mono font-semibold"
                         />
                       </div>
 
@@ -197,7 +356,7 @@ export default function CRMConfigureOffering() {
                         <input
                           type="text"
                           readOnly
-                          value="Offer59"
+                          value={currentOffer.shortName}
                           className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800 font-medium"
                         />
                       </div>
@@ -210,8 +369,8 @@ export default function CRMConfigureOffering() {
                         <input
                           type="text"
                           readOnly
-                          value="S49023"
-                          className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800"
+                          value={currentOffer.offeringCode}
+                          className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800 font-mono"
                         />
                       </div>
 
@@ -223,7 +382,7 @@ export default function CRMConfigureOffering() {
                         <input
                           type="text"
                           readOnly
-                          value="No"
+                          value={currentOffer.primaryOffering}
                           className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800"
                         />
                       </div>
@@ -236,8 +395,8 @@ export default function CRMConfigureOffering() {
                         <input
                           type="text"
                           readOnly
-                          value="4G"
-                          className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800"
+                          value={currentOffer.teleType}
+                          className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800 font-semibold"
                         />
                       </div>
 
@@ -249,7 +408,7 @@ export default function CRMConfigureOffering() {
                         <input
                           type="text"
                           readOnly
-                          value="Subscriber"
+                          value={currentOffer.ownerType}
                           className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800"
                         />
                       </div>
@@ -260,7 +419,7 @@ export default function CRMConfigureOffering() {
                         <input
                           type="text"
                           readOnly
-                          value="Simple Offering"
+                          value={currentOffer.offeringPackage}
                           className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800"
                         />
                       </div>
@@ -273,7 +432,7 @@ export default function CRMConfigureOffering() {
                         <input
                           type="text"
                           readOnly
-                          value="Sell Singly"
+                          value={currentOffer.sellSingly}
                           className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800"
                         />
                       </div>
@@ -286,7 +445,7 @@ export default function CRMConfigureOffering() {
                         <input
                           type="text"
                           readOnly
-                          value="Individual"
+                          value={currentOffer.offeringType}
                           className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800"
                         />
                       </div>
@@ -299,8 +458,8 @@ export default function CRMConfigureOffering() {
                         <input
                           type="text"
                           readOnly
-                          value="All"
-                          className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800"
+                          value={currentOffer.paymentFlag}
+                          className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800 font-semibold"
                         />
                       </div>
 
@@ -310,8 +469,8 @@ export default function CRMConfigureOffering() {
                         <input
                           type="text"
                           readOnly
-                          value="Release"
-                          className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800"
+                          value={currentOffer.status}
+                          className="flex-1 bg-emerald-50 border border-emerald-300 rounded px-2 py-1 text-xs text-emerald-800 font-bold"
                         />
                       </div>
 
@@ -321,8 +480,8 @@ export default function CRMConfigureOffering() {
                         <input
                           type="text"
                           readOnly
-                          value="Other"
-                          className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800"
+                          value={currentOffer.category}
+                          className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800 font-medium"
                         />
                       </div>
 
@@ -332,7 +491,7 @@ export default function CRMConfigureOffering() {
                         <input
                           type="text"
                           readOnly
-                          value=""
+                          value={currentOffer.subCategory}
                           className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800"
                         />
                       </div>
@@ -343,8 +502,8 @@ export default function CRMConfigureOffering() {
                         <input
                           type="text"
                           readOnly
-                          value="৳0.00"
-                          className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800"
+                          value={currentOffer.initialBalance}
+                          className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800 font-mono"
                         />
                       </div>
 
@@ -354,8 +513,8 @@ export default function CRMConfigureOffering() {
                         <input
                           type="text"
                           readOnly
-                          value="৳0.00"
-                          className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800"
+                          value={currentOffer.monthlyFee}
+                          className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800 font-mono font-semibold"
                         />
                       </div>
 
@@ -365,7 +524,7 @@ export default function CRMConfigureOffering() {
                         <input
                           type="text"
                           readOnly
-                          value="Not Group"
+                          value={currentOffer.groupFlag}
                           className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800"
                         />
                       </div>
@@ -377,8 +536,8 @@ export default function CRMConfigureOffering() {
                           <input
                             type="text"
                             readOnly
-                            value=""
-                            className="w-full bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800 pr-10"
+                            value={currentOffer.offerValueRule}
+                            className="w-full bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800 pr-10 font-mono"
                           />
                           <div className="absolute right-1 flex items-center gap-1 text-gray-400">
                             <Search className="w-3 h-3 cursor-pointer hover:text-gray-600" />
@@ -393,7 +552,7 @@ export default function CRMConfigureOffering() {
                         <input
                           type="text"
                           readOnly
-                          value=""
+                          value={currentOffer.description}
                           className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800"
                         />
                       </div>
@@ -469,7 +628,7 @@ export default function CRMConfigureOffering() {
                         <input
                           type="text"
                           readOnly
-                          value=""
+                          value="Days"
                           className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800"
                         />
                       </div>
@@ -480,7 +639,7 @@ export default function CRMConfigureOffering() {
                         <input
                           type="text"
                           readOnly
-                          value=""
+                          value="30"
                           className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800"
                         />
                       </div>
@@ -491,7 +650,7 @@ export default function CRMConfigureOffering() {
                         <input
                           type="text"
                           readOnly
-                          value=""
+                          value="10"
                           className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800"
                         />
                       </div>
@@ -502,8 +661,8 @@ export default function CRMConfigureOffering() {
                         <input
                           type="text"
                           readOnly
-                          value=""
-                          className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800"
+                          value="Teletalk Mobile"
+                          className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800 font-medium"
                         />
                       </div>
 
@@ -513,7 +672,7 @@ export default function CRMConfigureOffering() {
                         <input
                           type="text"
                           readOnly
-                          value="Gallery->Sales Catalog->Supplementary Offerings Sale->Common"
+                          value={`Gallery->Sales Catalog->Supplementary Offerings Sale->${currentOffer.category}`}
                           className="flex-1 bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs text-gray-800 font-medium"
                         />
                       </div>
