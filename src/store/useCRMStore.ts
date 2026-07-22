@@ -122,6 +122,8 @@ const mockComplaints: Complaint[] = [
   { id: 'CMP002', customerId: '1', category: 'Billing Issue', status: 'Pending' }
 ];
 
+const hasStoredUser = typeof window !== 'undefined' && !!localStorage.getItem('currentUser');
+
 export const useCRMStore = create<CRMStore>((set, get) => ({
   customers: mockCustomers,
   packages: mockPackages,
@@ -130,7 +132,7 @@ export const useCRMStore = create<CRMStore>((set, get) => ({
   orders: mockOrders,
   complaints: mockComplaints,
   currentCustomer: null,
-  isLoggedIn: false,
+  isLoggedIn: hasStoredUser,
   selectedSystem: null,
   setCurrentCustomer: (customer) => set({ currentCustomer: customer }),
   searchCustomerByMobile: (mobile) => {
@@ -139,5 +141,10 @@ export const useCRMStore = create<CRMStore>((set, get) => ({
   },
   login: () => set({ isLoggedIn: true }),
   selectSystem: (system) => set({ selectedSystem: system }),
-  logout: () => set({ isLoggedIn: false, selectedSystem: null, currentCustomer: null })
+  logout: () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('currentUser');
+    }
+    set({ isLoggedIn: false, selectedSystem: null, currentCustomer: null });
+  }
 }));

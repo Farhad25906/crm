@@ -82,6 +82,8 @@ export default function CRMDashboard() {
       addTab({ id: 'pack', name: 'Pack', path, isClosable: true });
     } else if (path.includes('/crm/batch-customer-operation')) {
       addTab({ id: 'batch-customer-operation', name: 'Batch for Customer Operation', path, isClosable: true });
+    } else if (path.includes('/crm/configure-offering')) {
+      addTab({ id: 'configure-offering', name: 'Configure Offering', path, isClosable: true });
     } else if (path.includes('/crm/inventory/') || path.includes('/crm/inventory-module/')) {
       const parts = path.split('/');
       const slug = parts[parts.length - 1];
@@ -130,6 +132,18 @@ export default function CRMDashboard() {
   // Determine active dynamic menu based on path
   const getSidebarConfig = () => {
     const path = location.pathname;
+
+    if (path.includes('/crm/configure-offering')) {
+      return {
+        title: 'Product Catalog Menu',
+        items: [
+          { name: 'Configure Offering', path: '/crm/configure-offering', active: true },
+          { name: 'Product Configuration', path: '/crm/configure-offering' },
+          { name: 'Offer Catalog', path: '/crm/configure-offering' },
+          { name: 'Site Map', path: '/crm/site-map' }
+        ]
+      };
+    }
 
     if (path.includes('/crm/site-map')) {
       return {
@@ -447,14 +461,30 @@ export default function CRMDashboard() {
       <div className="bg-[#f8f9fa] border-b border-[#cfd2d7] px-4 py-1 text-[11px] text-gray-600 font-medium flex items-center gap-1 select-none">
         <span>Home</span>
         <span>&gt;</span>
-        <span>Inventory</span>
-        <span>&gt;</span>
-        {activeTabId === 'site-map' ? (
-          <span className="font-semibold text-gray-800">Site Map</span>
+        {activeTabId === 'configure-offering' ? (
+          <>
+            <span>Product Catalog</span>
+            <span>&gt;</span>
+            <span>Product Configuration</span>
+            <span>&gt;</span>
+            <span className="font-semibold text-gray-800">Configure Offering</span>
+          </>
+        ) : activeTabId === 'site-map' ? (
+          <>
+            <span>Inventory</span>
+            <span>&gt;</span>
+            <span className="font-semibold text-gray-800">Site Map</span>
+          </>
         ) : activeTabId === 'workspace' ? (
-          <span className="font-semibold text-gray-800">Workspace</span>
+          <>
+            <span>Inventory</span>
+            <span>&gt;</span>
+            <span className="font-semibold text-gray-800">Workspace</span>
+          </>
         ) : (
           <>
+            <span>Inventory</span>
+            <span>&gt;</span>
             <span>Query</span>
             <span>&gt;</span>
             <span className="font-semibold text-gray-800">

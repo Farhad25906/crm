@@ -21,8 +21,8 @@ export default function CRMSiteMap() {
     {
       title: 'Configuration',
       items: [
-        ['Number Rule', 'Vendor', 'Department Permission', 'Recycling Rule'],
-        ['Item Code', 'Prefix', 'Resource Type', 'Inventory Alarm Rule']
+        ['Configure Offering', 'Number Rule', 'Vendor', 'Department Permission'],
+        ['Recycling Rule', 'Item Code', 'Prefix', 'Resource Type']
       ]
     },
     {
@@ -67,7 +67,8 @@ export default function CRMSiteMap() {
     'Receive Resource': '/crm/receive-resource',
     'Resource Inventory': '/crm/resource-inventory',
     'Query Package': '/crm/query-package',
-    'Pack': '/crm/pack'
+    'Pack': '/crm/pack',
+    'Configure Offering': '/crm/configure-offering'
   };
 
   const handleLinkClick = (item: string) => {
